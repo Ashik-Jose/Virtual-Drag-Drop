@@ -2,6 +2,7 @@ import cv2
 from cvzone.HandTrackingModule import HandDetector
 import cvzone
 import numpy as np
+from time import sleep
 
 cap = cv2.VideoCapture(0)
 
@@ -43,6 +44,13 @@ class DragDrop():
                 self.colorR=(250,120,250)
                 rect.colorR = (0,250,0)
 
+    def removeSquare(self,cursor):
+        cx,cy = self.posCenter
+        w,h = self.size
+        
+        if cx-w//2<cursor[0]<cx+w//2 and cy-h//2<cursor[1]<cy+h//2:
+            rectList.remove(self)
+
 rectList = []
 for x in range(5):
     rectList.append(DragDrop([x*250+150,150]))
@@ -60,6 +68,7 @@ while True:
         hand1=hands[0]     
         lmList1 = hand1["lmList"]     
         l1,_=detector.findDistance((lmList1[8][0],lmList1[8][1]),(lmList1[12][0],lmList1[12][1]),img=None)   
+        l4,_=detector.findDistance((lmList1[8][0],lmList1[8][1]),(lmList1[4][0],lmList1[4][1]),img=None)
         if l1<55 :
             cursor1 = lmList1[8]
             #print(l)
@@ -70,6 +79,10 @@ while True:
         else:
             for rect in rectList:
                 rect.colorR = (250,120,250)
+        if l4<45:
+            cursor4 = lmList1[4]
+            for rect in rectList:
+                rect.removeSquare(cursor4)
         
 
 
@@ -78,7 +91,7 @@ while True:
             hand2=hands[1]
             lmList2 = hand2["lmList"]
             l2,_=detector.findDistance((lmList2[8][0],lmList2[8][1]),(lmList2[12][0],lmList2[12][1]),img=None)
-            l3,_=detector.findDistance((lmList1[4][0],lmList1[4][1]),(lmList2[20][0],lmList2[20][1]),img=None)
+            l3,_=detector.findDistance((lmList2[4][0],lmList2[4][1]),(lmList2[8][0],lmList2[8][1]),img=None)
             if l2<55 :
                 cursor2 = lmList2[8]
             #print(l)
@@ -87,10 +100,12 @@ while True:
                 else:
                     for rect in rectList:
                         rect.colorR = (250,120,250)
-            if l3<50 :
-                cursor3 = lmList1[1]
+            if l3<45 :
+                cursor3 = lmList2[4]
                 rectList.append(DragDrop([cursor3[0],cursor3[1]]))
                 cv2.rectangle(imgNew,(cx-w//2,cy-h//2),(cx+w//2,cy+h//2),rect.colorR,cv2.FILLED)
+                sleep(0.5)
+                
 
     # for rect in rectList:        
     #     cx,cy = rect.posCenter
