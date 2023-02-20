@@ -24,11 +24,24 @@ class DragDrop():
 
         cx,cy = self.posCenter
         w,h = self.size
+        flag=True
 
         if cx-w//2<cursor[0]<cx+w//2 and cy-h//2<cursor[1]<cy+h//2:
-            self.posCenter[0]= cursor[0]
-            self.posCenter[1]= cursor[1]
-            self.colorR = (0,250,0)
+            for rect in rectList:
+                if rect!=self and cx-w//2<rect.posCenter[0]<cx+w//2 and cy-h//2<rect.posCenter[1]<cy+h//2:
+                    flag=False
+                    break
+                elif rect!=self:
+                    flag=True
+            if flag:        
+                self.posCenter[0]= cursor[0]
+                self.posCenter[1]= cursor[1]
+                self.colorR = (0,250,0)
+            else:
+                rect.posCenter[0]= cursor[0]
+                rect.posCenter[1]= cursor[1]
+                self.colorR=(250,120,250)
+                rect.colorR = (0,250,0)
 
 rectList = []
 for x in range(5):
@@ -51,15 +64,21 @@ while True:
             cursor1 = lmList1[8]
             #print(l)
             for rect in rectList:
-                rect.update(cursor1)         
+                rect.update(cursor1)     
+                # if val==False:
+                #     continue
         else:
             for rect in rectList:
                 rect.colorR = (250,120,250)
+        
+
+
         
         if len(hands)==2:
             hand2=hands[1]
             lmList2 = hand2["lmList"]
             l2,_=detector.findDistance((lmList2[8][0],lmList2[8][1]),(lmList2[12][0],lmList2[12][1]),img=None)
+            l3,_=detector.findDistance((lmList1[4][0],lmList1[4][1]),(lmList2[20][0],lmList2[20][1]),img=None)
             if l2<55 :
                 cursor2 = lmList2[8]
             #print(l)
@@ -68,6 +87,10 @@ while True:
                 else:
                     for rect in rectList:
                         rect.colorR = (250,120,250)
+            if l3<50 :
+                cursor3 = lmList1[1]
+                rectList.append(DragDrop([cursor3[0],cursor3[1]]))
+                cv2.rectangle(imgNew,(cx-w//2,cy-h//2),(cx+w//2,cy+h//2),rect.colorR,cv2.FILLED)
 
     # for rect in rectList:        
     #     cx,cy = rect.posCenter
